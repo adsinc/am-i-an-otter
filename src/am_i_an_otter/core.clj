@@ -14,5 +14,11 @@
            (GET "/upload" [] (page-start-upload-otter))
            (GET "/votes" [] (page-otter-votes))
 
+           (mp/wrap-multipart-params
+             (POST "/add_otter" req (str (upload-otter req) (page-start-upload-otter))))
 
-           )
+           (route/resources "/")
+           (route/not-found "Page not found"))
+
+(def app
+  (handler/site main-routes))
