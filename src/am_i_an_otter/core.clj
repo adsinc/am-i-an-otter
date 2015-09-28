@@ -1,5 +1,6 @@
 (ns am-i-an-otter.core
   (:use compojure.core)
+  (:use hiccup.core)
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             [ring.middleware.multipart-params :as mp]))
@@ -7,6 +8,8 @@
 (load "imports")
 (load "otters-db")
 (load "otters")
+
+(declare page-compare-otters)
 
 (defroutes main-routes
            (GET "/" [] (page-compare-otters))
@@ -22,3 +25,5 @@
 
 (def app
   (handler/site main-routes))
+
+(defn page-compare-otters)
