@@ -11,6 +11,7 @@
 
 (declare page-compare-otters)
 (declare page-upvote-otter)
+(declare page-otter-votes)
 
 (defroutes main-routes
            (GET "/" [] (page-compare-otters))
@@ -40,4 +41,17 @@
           [:p "Click " [:a {:href "/upload"} "here"]
            " to upload a brand new otter"])))
 
-(defn page-upvote-otter [])
+(defn page-upvote-otter []
+  (html [:h1 "Upload new otter"]
+        [:p [:form {:action "/add_otter" :method "POST" :enctype "multipart/form-data"}
+             [:input {:name "file" :type "file" :size "20"}]
+             [:input {:name "submit" :type "submit" :value "submit"}]]]
+        [:p "Or click " [:a {:href "/"} "here"] " to vote on some otters"]))
+
+(defn page-otter-votes []
+  (let []
+    (.debug (get-logger) (str "Otters: " @otter-votes-r))
+    (html [:h1 "Otter votes"]
+          [:div#votes.otter-votes
+           (for [x (keys @page-otter-votes)]
+             [:p [:img {:src (str "/img/" (get otter-pics x))}] (get @otter-votes-r x)])])))
