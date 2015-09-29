@@ -3,7 +3,8 @@
   (:use hiccup.core)
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
-            [ring.middleware.multipart-params :as mp]))
+            [ring.middleware.multipart-params :as mp])
+  (:import (java.io File)))
 
 (load "imports")
 (load "otters-db")
@@ -55,3 +56,7 @@
           [:div#votes.otter-votes
            (for [x (keys @page-otter-votes)]
              [:p [:img {:src (str "/img/" (get otter-pics x))}] (get @otter-votes-r x)])])))
+
+(def otter-img-dir "resources/public/img")
+(def otter-img-dir-fq
+  (str (.getAbsolutePath (File. ".")) "/" otter-img-dir))
