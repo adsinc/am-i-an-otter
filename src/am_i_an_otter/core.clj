@@ -4,7 +4,8 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             [ring.middleware.multipart-params :as mp])
-  (:import (java.io File)))
+  (:import (java.io File)
+           (java.nio.file FileSystems)))
 
 (load "imports")
 (load "otters-db")
@@ -60,3 +61,20 @@
 (def otter-img-dir "resources/public/img")
 (def otter-img-dir-fq
   (str (.getAbsolutePath (File. ".")) "/" otter-img-dir))
+
+(defn make-matcher [pattern]
+  (.getPathMatcher (FileSystems/getDefault) (str "glob:" pattern)))
+
+(defn file-find [file matcher]
+  (let [fname (.getName file (- (.getNameCount file) 1))]
+    (if (and (not (nil? fname)) (.matches matcher fname))
+      (.toString fname)
+      nil)))
+
+(defn next-map-id [map-with-id]
+  (+ 1 (nth (max (let [map-ids (keys map-with-id)]
+                   (if (nil? map-ids) [0] map-ids))) 0 )))
+
+(defn alter-file-map [file-map fname]
+  (assoc file-map (next-map-id file-map) fname))
+
