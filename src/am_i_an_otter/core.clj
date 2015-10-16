@@ -5,7 +5,7 @@
             [compojure.handler :as handler]
             [ring.middleware.multipart-params :as mp])
   (:import (java.io File)
-           (java.nio.file FileSystems)))
+           (java.nio.file FileSystems SimpleFileVisitor FileVisitResult Files Paths)))
 
 (load "imports")
 (load "otters-db")
@@ -78,3 +78,26 @@
 (defn alter-file-map [file-map fname]
   (assoc file-map (next-map-id file-map) fname))
 
+(defn make-scanner [pattern file-map-r]
+  (let [matcher (make-matcher pattern)]
+    (proxy [SimpleFileVisitor] []
+      (visitFile [file attribs]
+        (let [my-file file.
+              my-attrs attribs
+              file-name (file-find my-file matcher)]
+          (.debug (get-logger) (str "Return form file-find " file-name))
+          (if (not (nil? file-name))
+            (dosync (alter file-map-r alter-file-map file-name) file-map-r)
+            nil)
+          (.debug (get-logger)
+                  (str "After return from file-find " @file-map-r))
+          FileVisitResult/CONTINUE)))))
+
+(defn scan-for-otters [file-map-r]
+  (let [my-map-r file-map-r]
+    (Files/walkFileTree (Paths/get otter-img-dir-fq
+                                   (into-array String []))
+                        (make-scanner "*.jpg" my-map-r))
+    my-map-r))
+
+(def otter-pics (deref (scan-for-otters (ref {}))))
